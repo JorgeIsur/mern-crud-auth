@@ -1,7 +1,9 @@
 import Task from '../models/task.model.js';
 
 export const getTasks = async (req, res) => {
-    const tasks = await Task.find();
+    const tasks = await Task.find({
+        user:req.user.id
+    }).populate('user');
     res.json(tasks);
 };
 
@@ -11,7 +13,8 @@ export const createTask = async (req, res) => {
     const newTask = new Task({
         title,
         description,
-        date
+        date,
+        user:req.user.id
     });
     const savedTask = await newTask.save();
 
@@ -21,11 +24,11 @@ export const createTask = async (req, res) => {
 export const deleteTask = async (req, res) => {
     const taskDeleted = await Task.findByIdAndDelete(req.params.id);
     if(!taskDeleted) return res.status(404).json({message:"Tarea no encontrada"});
-    res.json(taskDeleted);
+    return res.sendStatus(204);
 };
 
 export const getTask = async (req, res) => {
-    const taskFound = await Task.findById(req.params.id);
+    const taskFound = await Task.findById(req.params.id).populate('user');
     if(!taskFound) return res.status(404).json({message:"Tarea no encontrada"});
     res.json(taskFound);
 };
